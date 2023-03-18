@@ -1,0 +1,80 @@
+version: "3.5"
+
+networks:
+  net-spring-circuit-breaker:
+    driver: bridge
+
+services:
+  psql-products:
+    image: postgres:13.3-alpine
+    container_name: "psql-products"
+    hostname: psql-products
+    labels:
+      br.dev.multicode.author: "Andre Ferreira <andre.dev.linux@gmail.com>"
+      br.dev.multicode.license: "MIT"
+    expose:
+      - '5432'
+    ports:
+      - "54321:5432"
+    environment:
+      POSTGRES_USER: mcproducts
+      POSTGRES_PASSWORD: mcproducts
+      POSTGRES_DB: mcproducts
+    networks:
+      net-spring-circuit-breaker:
+
+  psql-assessments:
+    image: postgres:13.3-alpine
+    container_name: "psql-assessments"
+    hostname: psql-assessments
+    labels:
+      br.dev.multicode.author: "Andre Ferreira <andre.dev.linux@gmail.com>"
+      br.dev.multicode.license: "MIT"
+    expose:
+      - '5432'
+    ports:
+      - "54322:5432"
+    environment:
+      POSTGRES_USER: mcassessments
+      POSTGRES_PASSWORD: mcassessments
+      POSTGRES_DB: mcassessments
+    networks:
+      net-spring-circuit-breaker:
+
+  # Jeager
+  jaeger-all-in-one:
+    image: jaegertracing/all-in-one:latest
+    command: ["--query.max-clock-skew-adjustment=1s"]
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+    ports:
+      - "16686:16686"
+      - "14268"
+      - "14250"
+    networks:
+      net-spring-circuit-breaker:
+  
+  # Zipkin
+  zipkin-all-in-one:
+    image: openzipkin/zipkin:latest
+    ports:
+      - "9411:9411"
+    networks:
+      net-spring-circuit-breaker:
+  
+  # OTEL Collector
+  otel-collector:
+    image: otel/opentelemetry-collector:0.73.0
+    command: [ "--config=/etc/otel-collector-config.yaml" ]
+    volumes:
+      - ./opentelemetry/otel-config.yaml:/etc/otel-collector-config.yaml
+    ports:
+      - "1888:1888"   # pprof extension
+      - "13133:13133" # health_check extension
+      - "4317:4317"   # OTLP gRPC receiver
+      - "55670:55679" # zpages extension
+    depends_on:
+      - jaeger-all-in-one
+      - zipkin-all-in-one
+    networks:
+      net-spring-circuit-breaker:
