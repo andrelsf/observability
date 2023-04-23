@@ -16,7 +16,8 @@
 
 PROJECTS=("mc-composer-reactive" "mc-products" "mc-assessments")
 
-for PROJECT in "${PROJECTS[@]}" do
+for PROJECT in "${PROJECTS[@]}" 
+do
     if [ ! -d "$PROJECT" ]; then
         echo "Cloning project... $PROJECT"
         git clone https://github.com/andrelsf/"$PROJECT".git
