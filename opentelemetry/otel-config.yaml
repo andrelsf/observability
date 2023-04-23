@@ -23,13 +23,22 @@ exporters:
     endpoint: "http://zipkin-all-in-one:9411/api/v2/spans"
     tls:
       insecure: true
+  prometheus:
+    endpoint: "0.0.0.0:8889"
+    namespace: devopsgo
+    const_labels:
+      x-tenant-id: devopsgo
+    send_timestamps: true
+    metric_expiration: 180m
+    resource_to_telemetry_conversion:
+      enabled: true
 
 service:
   pipelines:
     metrics:
       receivers: [otlp]
       processors: [batch]
-      exporters: [logging]
+      exporters: [logging, prometheus]
     traces:
       receivers: [otlp]
       processors: [batch]

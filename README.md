@@ -1,3 +1,5 @@
+sum(otelcol_exporter_sent_spans offset 1m) by (exporter)
+
 
 # Instrumentacao Automatica com Agente Otel
 

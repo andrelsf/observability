@@ -1,0 +1,68 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+
+exporters:
+  logging:
+    loglevel: debug
+  jaeger:
+    endpoint: jaeger:14250
+    tls:
+      insecure: true
+  zipkin:
+    endpoint: "http://zipkin:9411/api/v2/spans"
+    tls:
+      insecure: true
+  loki:
+    endpoint: http://loki:3100/loki/api/v1/push
+    tls:
+      insecure: true
+  prometheus:
+    endpoint: "0.0.0.0:8889"
+    send_timestamps: true
+    metric_expiration: 180m
+    resource_to_telemetry_conversion:
+      enabled: true
+    enable_open_metrics: true
+
+processors:
+  batch:
+  attributes:
+    actions:
+      - action: insert
+        key: service_name
+        from_attribute: service.name
+      - action: insert
+        key: meetup
+        value: devopsgo
+
+  resource:
+    attributes:
+      - action: insert
+        key: loki.resource.labels
+        from_attribute: service.name
+
+extensions:
+  memory_ballast:
+    size_mib: 512
+  zpages:
+    endpoint: 0.0.0.0:55679
+  pprof:
+    endpoint: 0.0.0.0:1777
+
+service:
+  pipelines:
+    metrics:
+      receivers: [otlp]
+      processors: [batch, resource, attributes]
+      exporters: [logging, prometheus]
+    traces:
+      receivers: [otlp]
+      processors: [batch, resource, attributes]
+      exporters: [jaeger, zipkin]
+    logs:
+      receivers: [otlp]
+      processors: [batch, resource, attributes]
+      exporters: [logging, loki]
+  extensions: [ memory_ballast, pprof, zpages ]
