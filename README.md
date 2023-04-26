@@ -1,6 +1,24 @@
 sum(otelcol_exporter_sent_spans offset 1m) by (exporter)
 
 
+### Testes
+
+```shell
+while true; do http --json GET :8090/api/composer/products/a137cf80-bbb6-4c2d-b07c-57a8a8446f5e/assessmentResponses/details; sleep 2; done 
+
+while true; do http --json GET :8090/api/composer/products/e44c4c60-47c7-4fb0-9af0-14dd1eb97818/assessmentResponses/details; sleep 2; done
+
+while true; do http --json GET :8090/api/composer/products/$(uuidgen)/assessmentResponses/details; sleep 2; done
+
+
+
+while true; do http --json GET :8090/api/v1/compose/products/a137cf80-bbb6-4c2d-b07c-57a8a8446f5e/details; sleep 2; done
+
+while true; do http --json GET :8090/api/v1/compose/products/e44c4c60-47c7-4fb0-9af0-14dd1eb97818/details; done
+
+while true; do http --json GET :8090/api/v1/compose/products/$(uuidgen)/details; done
+```
+
 # Instrumentacao Automatica com Agente Otel
 
 ```shell
